@@ -6,7 +6,7 @@
     <title>Iridite — Developer & AI Enthusiast</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;700;900&family=DM+Mono:wght@400;500&family=Archivo+Black&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;700;900&family=DM+Mono:wght@400;500&family=Archivo+Black&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         :root {
@@ -336,6 +336,73 @@
             50% { transform: translateX(-50%) translateY(10px); }
         }
 
+        /* About section */
+        .about-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            padding: 8rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .quote-mark {
+            font-family: 'EB Garamond', serif;
+            font-size: clamp(180px, 25vw, 320px);
+            line-height: 0.8;
+            color: var(--accent);
+            opacity: 0;
+            animation: quoteReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+            user-select: none;
+        }
+
+        @keyframes quoteReveal {
+            from { opacity: 0; transform: translateX(-50px) scale(0.8); }
+            to { opacity: 0.15; transform: translateX(0) scale(1); }
+        }
+
+        .about-content {
+            position: relative;
+        }
+
+        .about-text {
+            font-family: 'EB Garamond', serif;
+            font-size: clamp(20px, 2.5vw, 28px);
+            line-height: 1.9;
+            color: var(--fg);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: textReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+        }
+
+        @keyframes textReveal {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .about-signature {
+            font-family: 'EB Garamond', serif;
+            font-size: 16px;
+            font-style: italic;
+            text-align: right;
+            opacity: 0;
+            animation: textReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
+        }
+
+        .about-signature strong {
+            font-weight: 600;
+            font-style: normal;
+        }
+
         /* Projects section */
         .section {
             padding: 8rem 2rem;
@@ -389,6 +456,19 @@
             position: relative;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+            animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        .project-card:nth-child(1) { animation-delay: 0.1s; }
+        .project-card:nth-child(2) { animation-delay: 0.2s; }
+        .project-card:nth-child(3) { animation-delay: 0.3s; }
+        .project-card:nth-child(4) { animation-delay: 0.4s; }
+        .project-card:nth-child(5) { animation-delay: 0.5s; }
+        .project-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .project-card::before {
@@ -562,6 +642,20 @@
             margin-bottom: 3rem;
             flex-wrap: wrap;
             justify-content: center;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
         }
 
         .search-box {
@@ -579,6 +673,24 @@
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .sort-select {
+            font-family: 'DM Mono', monospace;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--fg);
+            padding: 0.8rem 1.2rem;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.1em;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
         .filter-btn {
@@ -597,6 +709,46 @@
             background: var(--accent);
             color: var(--bg);
             border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .expand-btn {
+            font-family: 'DM Mono', monospace;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 1rem 3rem;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.15em;
+            margin: 3rem auto 0;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .expand-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: var(--accent);
+            transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+
+        .expand-btn:hover {
+            color: var(--bg);
+        }
+
+        .expand-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         /* Skills section */
@@ -604,6 +756,24 @@
             background: var(--surface);
             padding: 4rem 2rem;
             margin: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skills-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .skills-grid {
@@ -612,16 +782,35 @@
             gap: 2rem;
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
         }
 
         .skill-item {
             text-align: center;
+            animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            transition: transform 0.3s;
+        }
+
+        .skill-item:nth-child(1) { animation-delay: 0.1s; }
+        .skill-item:nth-child(2) { animation-delay: 0.2s; }
+        .skill-item:nth-child(3) { animation-delay: 0.3s; }
+        .skill-item:nth-child(4) { animation-delay: 0.4s; }
+        .skill-item:nth-child(5) { animation-delay: 0.5s; }
+        .skill-item:nth-child(6) { animation-delay: 0.6s; }
+
+        .skill-item:hover {
+            transform: translateY(-10px);
         }
 
         .skill-icon {
             font-size: 48px;
             margin-bottom: 1rem;
             display: block;
+            transition: transform 0.3s;
+        }
+
+        .skill-item:hover .skill-icon {
+            transform: scale(1.2) rotate(5deg);
         }
 
         .skill-name {
@@ -644,13 +833,20 @@
             margin: 3rem auto 0;
             display: grid;
             gap: 1.5rem;
+            animation: fadeInCard 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            animation-delay: 0.2s;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
         }
+
+        .form-group:nth-child(1) { animation-delay: 0.3s; }
+        .form-group:nth-child(2) { animation-delay: 0.4s; }
+        .form-group:nth-child(3) { animation-delay: 0.5s; }
 
         .form-label {
             font-family: 'DM Mono', monospace;
@@ -674,6 +870,7 @@
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-2px);
         }
 
         .form-textarea {
@@ -717,6 +914,13 @@
             }
             .search-box {
                 min-width: 100%;
+            }
+            .about-container {
+                grid-template-columns: 80px 1fr;
+                gap: 2rem;
+            }
+            .about-text {
+                font-size: 18px;
             }
         }
     </style>
@@ -768,6 +972,21 @@
             <div class="scroll-indicator">SCROLL ↓</div>
         </section>
 
+        <!-- About Section -->
+        <section class="about-section">
+            <div class="about-container">
+                <div class="quote-mark">"</div>
+                <div class="about-content">
+                    <p class="about-text">
+                        System architect crafting sovereign narratives through code. Building AI-powered tools that bridge technical capability with human intent. From medical AI frameworks to autonomous agent platforms, I architect systems that amplify individual agency in an increasingly automated world.
+                    </p>
+                    <p class="about-signature">
+                        — <strong>Iridite</strong>, System Architect
+                    </p>
+                </div>
+            </div>
+        </section>
+
         <!-- Projects Section -->
         <section class="section">
             <div class="section-header">
@@ -776,24 +995,32 @@
             </div>
 
             <div class="controls">
-                <input
-                    type="text"
-                    v-model="searchQuery"
-                    placeholder="Search projects..."
-                    class="search-box"
-                >
-                <button
-                    v-for="tech in allTechs"
-                    :key="tech"
-                    @click="toggleFilter(tech)"
-                    :class="['filter-btn', { active: activeFilters.includes(tech) }]"
-                >
-                    {{ tech }}
-                </button>
+                <div class="controls-row">
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        placeholder="Search projects..."
+                        class="search-box"
+                    >
+                    <select v-model="sortBy" class="sort-select">
+                        <option value="stars">Sort by Stars</option>
+                        <option value="updated">Sort by Updated</option>
+                    </select>
+                </div>
+                <div class="controls-row">
+                    <button
+                        v-for="tech in allTechs"
+                        :key="tech"
+                        @click="toggleFilter(tech)"
+                        :class="['filter-btn', { active: activeFilters.includes(tech) }]"
+                    >
+                        {{ tech }}
+                    </button>
+                </div>
             </div>
 
             <div class="projects-grid">
-                <div v-for="project in filteredProjects" :key="project.name" class="project-card">
+                <div v-for="project in displayedProjects" :key="project.name" class="project-card">
                     <div class="project-header">
                         <h3 class="project-name">{{ project.name }}</h3>
                         <span class="project-stars">
@@ -811,6 +1038,14 @@
                     </div>
                 </div>
             </div>
+
+            <button
+                v-if="!showAllProjects && filteredProjects.length > 6 && !searchQuery && activeFilters.length === 0"
+                @click="showAllProjects = true"
+                class="expand-btn"
+            >
+                SHOW ALL {{ filteredProjects.length }} PROJECTS
+            </button>
         </section>
 
         <!-- Skills Section -->
@@ -871,6 +1106,8 @@
                     searchQuery: '',
                     activeFilters: [],
                     submitting: false,
+                    showAllProjects: false,
+                    sortBy: 'stars',
                     form: {
                         name: '',
                         email: '',
@@ -954,8 +1191,16 @@
                     this.projects.forEach(p => p.tech.forEach(t => techs.add(t)));
                     return Array.from(techs).sort();
                 },
+                sortedProjects() {
+                    return [...this.projects].sort((a, b) => {
+                        if (this.sortBy === 'stars') {
+                            return b.stars - a.stars || new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+                        }
+                        return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+                    });
+                },
                 filteredProjects() {
-                    let filtered = this.projects;
+                    let filtered = this.sortedProjects;
 
                     if (this.searchQuery) {
                         const query = this.searchQuery.toLowerCase();
@@ -972,6 +1217,12 @@
                     }
 
                     return filtered;
+                },
+                displayedProjects() {
+                    if (this.showAllProjects || this.searchQuery || this.activeFilters.length > 0) {
+                        return this.filteredProjects;
+                    }
+                    return this.filteredProjects.slice(0, 6);
                 }
             },
             methods: {
@@ -1019,13 +1270,34 @@
                         const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
                         const repos = await response.json();
 
-                        // Update project stats
+                        // Get all public repos
+                        const publicRepos = repos.filter(r => !r.fork && !r.private);
+
+                        // Update existing projects
                         this.projects.forEach(project => {
                             const repoName = project.github.split('/').pop();
-                            const repo = repos.find(r => r.name === repoName);
+                            const repo = publicRepos.find(r => r.name === repoName);
                             if (repo) {
                                 project.stars = repo.stargazers_count;
                                 project.forks = repo.forks_count;
+                                project.updated_at = repo.updated_at;
+                            }
+                        });
+
+                        // Add any missing public repos
+                        publicRepos.forEach(repo => {
+                            const exists = this.projects.some(p => p.github.includes(repo.name));
+                            if (!exists) {
+                                this.projects.push({
+                                    name: repo.name,
+                                    description: repo.description || 'No description available',
+                                    tech: repo.language ? [repo.language] : [],
+                                    stars: repo.stargazers_count,
+                                    forks: repo.forks_count,
+                                    github: repo.html_url,
+                                    demo: repo.homepage || null,
+                                    updated_at: repo.updated_at
+                                });
                             }
                         });
                     } catch (error) {
