@@ -1,1556 +1,1569 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-locale="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iridite — Developer & AI Enthusiast</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;700;900&family=DM+Mono:wght@400;500&family=Archivo+Black&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <title>Iridite - AI application engineer portfolio</title>
+    <meta
+        id="meta-description"
+        name="description"
+        content="Iridite is an AI application engineer in Shanghai building medical prediction research support, workflow systems, and a public-facing portfolio for collaboration and paid consultation."
+    >
+    <link
+        rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23183330'/%3E%3Cpath d='M20 48V16h10.5c8.5 0 13.5 5.8 13.5 16s-5 16-13.5 16H20Z' fill='%23F7F1E6'/%3E%3Ccircle cx='17' cy='17' r='5' fill='%23BE6844'/%3E%3C/svg%3E"
+    >
     <style>
         :root {
-            --bg: #0d0d0d;
-            --fg: #f5f5f0;
-            --accent: #ff3d00;
-            --accent-glow: rgba(255, 61, 0, 0.4);
-            --surface: #1a1a1a;
-            --surface-light: #252525;
-            --border: #333;
-        }
-
-        [data-theme="light"] {
-            --bg: #faf8f3;
-            --fg: #1a1a1a;
-            --accent: #d32f2f;
-            --accent-glow: rgba(211, 47, 47, 0.2);
-            --surface: #ffffff;
-            --surface-light: #f0ede5;
-            --border: #e0ddd5;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: var(--bg);
-            color: var(--fg);
-            font-family: 'Crimson Pro', serif;
-            overflow-x: hidden;
-            transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s;
-            cursor: crosshair;
-        }
-
-        /* Static grain texture */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        #app { position: relative; z-index: 1; }
-
-        /* Custom cursor trail */
-        .cursor-trail {
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: var(--accent);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        /* Theme toggle */
-        .theme-toggle {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            background: var(--surface);
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: var(--fg);
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 0 0 0 var(--accent-glow);
-        }
-
-        .theme-toggle:hover {
-            transform: rotate(180deg) scale(1.1);
-            box-shadow: 0 0 30px var(--accent-glow);
-        }
-
-        /* Hero section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Animated background shapes */
-        .bg-shape {
-            position: absolute;
-            border: 1px solid var(--accent);
-            opacity: 0.1;
-            animation: float 20s infinite ease-in-out;
-        }
-
-        .bg-shape:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            top: 10%;
-            left: 5%;
-            animation-delay: 0s;
-            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
-        }
-
-        .bg-shape:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            bottom: 15%;
-            right: 10%;
-            animation-delay: -7s;
-            border-radius: 41% 59% 38% 62% / 45% 60% 40% 55%;
-        }
-
-        .bg-shape:nth-child(3) {
-            width: 150px;
-            height: 150px;
-            top: 50%;
-            right: 20%;
-            animation-delay: -14s;
-            border-radius: 50%;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(120deg); }
-            66% { transform: translate(-20px, 20px) rotate(240deg); }
-        }
-
-        .hero-content {
-            text-align: center;
-            z-index: 2;
-            animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(60px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .hero-title {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: clamp(80px, 15vw, 220px);
-            line-height: 0.85;
-            letter-spacing: -0.04em;
-            margin-bottom: 1.5rem;
-            position: relative;
-            display: inline-block;
-        }
-
-        .hero-title span {
-            display: inline-block;
-            animation: letterReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-        }
-
-        .hero-title span:nth-child(1) { animation-delay: 0.1s; }
-        .hero-title span:nth-child(2) { animation-delay: 0.2s; }
-        .hero-title span:nth-child(3) { animation-delay: 0.3s; }
-        .hero-title span:nth-child(4) { animation-delay: 0.4s; }
-        .hero-title span:nth-child(5) { animation-delay: 0.5s; }
-        .hero-title span:nth-child(6) { animation-delay: 0.6s; }
-        .hero-title span:nth-child(7) { animation-delay: 0.7s; }
-
-        @keyframes letterReveal {
-            0% { opacity: 0; transform: translateY(100px) rotate(10deg); }
-            100% { opacity: 1; transform: translateY(0) rotate(0deg); }
-        }
-
-        .hero-title::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 4px;
-            background: var(--accent);
-            animation: lineExpand 1s 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes lineExpand {
-            to { width: 100%; }
-        }
-
-        .hero-subtitle {
-            font-family: 'DM Mono', monospace;
-            font-size: clamp(14px, 2vw, 18px);
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 3rem;
-            opacity: 0;
-            animation: fadeIn 0.8s 1s forwards;
-        }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 4rem;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            opacity: 0;
-            animation: fadeIn 0.8s 1.2s forwards;
-        }
-
-        .stat-item {
-            text-align: center;
-            position: relative;
-        }
-
-        .stat-item::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 2px;
-            background: var(--accent);
-        }
-
-        .stat-number {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: clamp(48px, 8vw, 72px);
-            color: var(--accent);
-            line-height: 1;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            opacity: 0.6;
-        }
-
-        .hero-links {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            opacity: 0;
-            animation: fadeIn 0.8s 1.4s forwards;
-        }
-
-        .hero-link {
-            font-family: 'DM Mono', monospace;
-            color: var(--fg);
-            text-decoration: none;
-            font-size: 13px;
-            letter-spacing: 0.15em;
-            padding: 1rem 2rem;
-            border: 2px solid var(--accent);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-            background: transparent;
-        }
-
-        .hero-link::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: var(--accent);
-            transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
-            transform: translate(-50%, -50%);
-            z-index: -1;
-        }
-
-        .hero-link:hover {
-            color: var(--bg);
-            border-color: var(--accent);
-        }
-
-        .hero-link:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 3rem;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 0.2em;
-            opacity: 0.4;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(10px); }
-        }
-
-        /* About section */
-        .about-section {
-            min-height: 80vh;
-            display: flex;
-            align-items: center;
-            padding: 8rem 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .about-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .quote-mark {
-            font-family: 'EB Garamond', serif;
-            font-size: clamp(180px, 25vw, 320px);
-            line-height: 0.8;
-            color: var(--accent);
-            opacity: 0;
-            animation: quoteReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-            user-select: none;
-        }
-
-        @keyframes quoteReveal {
-            from { opacity: 0; transform: translateX(-50px) scale(0.8); }
-            to { opacity: 0.15; transform: translateX(0) scale(1); }
-        }
-
-        .about-content {
-            position: relative;
-        }
-
-        .about-text {
-            font-family: 'EB Garamond', serif;
-            font-size: clamp(20px, 2.5vw, 28px);
-            line-height: 1.9;
-            color: var(--fg);
-            margin-bottom: 2rem;
-            opacity: 0;
-            animation: textReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
-        }
-
-        @keyframes textReveal {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .about-signature {
-            font-family: 'EB Garamond', serif;
-            font-size: 16px;
-            font-style: italic;
-            text-align: right;
-            opacity: 0;
-            animation: textReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
-        }
-
-        .about-signature strong {
-            font-weight: 600;
-            font-style: normal;
-        }
-
-        /* Projects section */
-        .section {
-            padding: 8rem 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .section-header {
-            margin-bottom: 5rem;
-            text-align: center;
-        }
-
-        .section-title {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: clamp(60px, 10vw, 120px);
-            letter-spacing: -0.03em;
-            position: relative;
-            display: inline-block;
-            margin-bottom: 1rem;
-        }
-
-        .section-title::before {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--accent);
-            opacity: 0.1;
-            transform: translate(4px, 4px);
-            z-index: -1;
-        }
-
-        .section-subtitle {
-            font-family: 'DM Mono', monospace;
-            font-size: 14px;
-            letter-spacing: 0.2em;
-            opacity: 0.5;
-            text-transform: uppercase;
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-
-        .project-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 2rem;
-            position: relative;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-            animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-        }
-
-        .project-card:nth-child(1) { animation-delay: 0.1s; }
-        .project-card:nth-child(2) { animation-delay: 0.2s; }
-        .project-card:nth-child(3) { animation-delay: 0.3s; }
-        .project-card:nth-child(4) { animation-delay: 0.4s; }
-        .project-card:nth-child(5) { animation-delay: 0.5s; }
-        .project-card:nth-child(6) { animation-delay: 0.6s; }
-
-        @keyframes fadeInCard {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .project-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--accent);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .project-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, var(--accent-glow));
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .project-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .project-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .project-card:hover::after {
-            width: 100%;
-        }
-
-        .project-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .project-name {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: 24px;
-            letter-spacing: 0.02em;
-            color: var(--accent);
-        }
-
-        .project-stars {
-            font-family: 'DM Mono', monospace;
-            font-size: 14px;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .project-desc {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            opacity: 0.8;
-            position: relative;
-            z-index: 1;
-        }
-
-        .project-tech {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .tech-tag {
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            padding: 0.4rem 0.8rem;
-            background: var(--surface-light);
-            border: 1px solid var(--border);
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            transition: all 0.3s;
-        }
-
-        .tech-tag:hover {
-            background: var(--accent);
-            color: var(--bg);
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .project-links {
-            display: flex;
-            gap: 1.5rem;
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .project-link {
-            color: var(--fg);
-            text-decoration: none;
-            opacity: 0.6;
-            transition: all 0.3s;
-            letter-spacing: 0.1em;
-        }
-
-        .project-link:hover {
-            opacity: 1;
-            color: var(--accent);
-            transform: translateX(5px);
-        }
-
-        /* Loading state */
-        .loading {
-            opacity: 0.5;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.8; }
-        }
-
-        /* Footer */
-        .footer {
-            padding: 6rem 2rem;
-            text-align: center;
-            border-top: 1px solid var(--border);
-            position: relative;
-        }
-
-        .footer-title {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: clamp(40px, 8vw, 80px);
-            margin-bottom: 2rem;
-            letter-spacing: -0.02em;
-        }
-
-        .footer-email {
-            font-family: 'DM Mono', monospace;
-            font-size: 16px;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            letter-spacing: 0.1em;
-        }
-
-        .footer-location {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            opacity: 0.3;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-        }
-
-        /* Filter & Search */
-        .controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .controls-row {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .search-box {
-            font-family: 'DM Mono', monospace;
-            background: var(--surface);
-            border: 2px solid var(--border);
-            color: var(--fg);
-            padding: 0.8rem 1.2rem;
-            font-size: 14px;
-            min-width: 300px;
-            transition: all 0.3s;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
-            transform: translateY(-2px);
-        }
-
-        .sort-select {
-            font-family: 'DM Mono', monospace;
-            background: var(--surface);
-            border: 2px solid var(--border);
-            color: var(--fg);
-            padding: 0.8rem 1.2rem;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 0.1em;
-        }
-
-        .sort-select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .filter-btn {
-            font-family: 'DM Mono', monospace;
-            background: var(--surface);
-            border: 2px solid var(--border);
-            color: var(--fg);
-            padding: 0.8rem 1.5rem;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 0.1em;
-        }
-
-        .filter-btn:hover, .filter-btn.active {
-            background: var(--accent);
-            color: var(--bg);
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .expand-btn {
-            font-family: 'DM Mono', monospace;
-            background: transparent;
-            border: 2px solid var(--accent);
-            color: var(--accent);
-            padding: 1rem 3rem;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: 0.15em;
-            margin: 3rem auto 0;
-            display: block;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .expand-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: var(--accent);
-            transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
-            transform: translate(-50%, -50%);
-            z-index: -1;
-        }
-
-        .expand-btn:hover {
-            color: var(--bg);
-        }
-
-        .expand-btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        /* Skills section */
-        .skills-section {
-            background: var(--surface);
-            padding: 4rem 2rem;
-            margin: 4rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .skills-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .skill-item {
-            text-align: center;
-            animation: fadeInCard 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-            transition: transform 0.3s;
-            cursor: pointer;
-        }
-
-        .skill-item:nth-child(1) { animation-delay: 0.1s; }
-        .skill-item:nth-child(2) { animation-delay: 0.2s; }
-        .skill-item:nth-child(3) { animation-delay: 0.3s; }
-        .skill-item:nth-child(4) { animation-delay: 0.4s; }
-        .skill-item:nth-child(5) { animation-delay: 0.5s; }
-        .skill-item:nth-child(6) { animation-delay: 0.6s; }
-
-        .skill-item:hover {
-            transform: translateY(-10px);
-        }
-
-        .skill-icon {
-            font-size: 48px;
-            margin-bottom: 1rem;
-            display: block;
-            transition: transform 0.3s;
-        }
-
-        .skill-item:hover .skill-icon {
-            transform: scale(1.2) rotate(5deg);
-        }
-
-        .skill-name {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: 18px;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-        }
-
-        .skill-level {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            opacity: 0.5;
-            letter-spacing: 0.1em;
-        }
-
-        /* Skill Detail Panel */
-        .skill-panel-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            display: flex;
-            justify-content: flex-end;
-            align-items: stretch;
-        }
-
-        .skill-panel {
-            width: 500px;
-            max-width: 90vw;
-            background: var(--surface);
-            border-left: 4px solid var(--accent);
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .skill-panel-close {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            width: 40px;
-            height: 40px;
-            background: transparent;
-            border: 2px solid var(--border);
-            color: var(--fg);
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-        }
-
-        .skill-panel-close:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            transform: rotate(90deg);
-        }
-
-        .skill-panel-content {
-            padding: 4rem 3rem;
-        }
-
-        .skill-panel-icon {
-            font-size: 80px;
-            display: block;
-            margin-bottom: 1.5rem;
-        }
-
-        .skill-panel-title {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: 36px;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-        }
-
-        .skill-panel-level {
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            opacity: 0.5;
-            margin-bottom: 2rem;
-        }
-
-        .skill-panel-divider {
-            width: 60px;
-            height: 3px;
-            background: var(--accent);
-            margin-bottom: 2rem;
-        }
-
-        .skill-panel-description {
-            font-family: 'EB Garamond', serif;
-            font-size: 20px;
-            line-height: 1.8;
-            margin-bottom: 2.5rem;
-        }
-
-        .skill-panel-projects-title {
-            font-family: 'Archivo Black', sans-serif;
-            font-size: 16px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-            opacity: 0.7;
-        }
-
-        .skill-panel-projects-list {
-            list-style: none;
+            --bg: #f7f1e6;
+            --bg-soft: #fcf8f1;
+            --surface: rgba(255, 250, 243, 0.78);
+            --surface-strong: rgba(255, 250, 243, 0.94);
+            --ink: #171513;
+            --muted: #6a6057;
+            --line: rgba(23, 21, 19, 0.12);
+            --line-strong: rgba(23, 21, 19, 0.2);
+            --accent: #be6844;
+            --accent-soft: rgba(190, 104, 68, 0.12);
+            --pine: #183330;
+            --pine-soft: rgba(24, 51, 48, 0.12);
+            --shadow: 0 24px 60px rgba(23, 21, 19, 0.08);
+            --radius-xl: 34px;
+            --radius-lg: 24px;
+            --radius-md: 18px;
+            --radius-pill: 999px;
+            --content-width: 1200px;
+            --sans: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+            --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            --sans-zh: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Noto Sans CJK SC", sans-serif;
+            --serif-zh: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
             padding: 0;
         }
 
-        .skill-panel-projects-list li {
-            font-family: 'Crimson Pro', serif;
-            font-size: 16px;
-            line-height: 1.8;
-            padding-left: 1.5rem;
-            position: relative;
-            margin-bottom: 0.8rem;
+        html {
+            scroll-behavior: smooth;
         }
 
-        .skill-panel-projects-list li::before {
-            content: '→';
-            position: absolute;
+        body {
+            background:
+                radial-gradient(circle at 12% 10%, rgba(190, 104, 68, 0.14), transparent 24%),
+                radial-gradient(circle at 88% 16%, rgba(24, 51, 48, 0.10), transparent 22%),
+                linear-gradient(180deg, #fdf8ef 0%, var(--bg) 100%);
+            color: var(--ink);
+            font-family: var(--sans);
+            min-height: 100vh;
+            overflow-x: clip;
+        }
+
+        body::before {
+            background-image:
+                linear-gradient(rgba(23, 21, 19, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(23, 21, 19, 0.03) 1px, transparent 1px);
+            background-position: center;
+            background-size: 36px 36px;
+            content: "";
+            inset: 0;
+            opacity: 0.32;
+            pointer-events: none;
+            position: fixed;
+            z-index: -2;
+        }
+
+        body::after {
+            background:
+                radial-gradient(circle at 18% 76%, rgba(24, 51, 48, 0.06), transparent 18%),
+                radial-gradient(circle at 84% 72%, rgba(190, 104, 68, 0.08), transparent 18%);
+            content: "";
+            inset: 0;
+            pointer-events: none;
+            position: fixed;
+            z-index: -1;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            background: none;
+            border: 0;
+            color: inherit;
+            font: inherit;
+        }
+
+        .page-shell {
+            padding: 0 20px 36px;
+        }
+
+        .site-header {
+            backdrop-filter: blur(18px);
+            background: rgba(253, 248, 239, 0.84);
+            border: 1px solid rgba(23, 21, 19, 0.08);
+            border-radius: 26px;
+            left: 50%;
+            max-width: calc(var(--content-width) + 40px);
+            position: sticky;
+            top: 14px;
+            transform: translateX(-50%);
+            width: calc(100% - 24px);
+            z-index: 30;
+        }
+
+        .site-header__inner {
+            align-items: center;
+            display: grid;
+            gap: 18px;
+            grid-template-columns: auto 1fr auto;
+            margin: 0 auto;
+            max-width: var(--content-width);
+            padding: 14px 18px;
+        }
+
+        .brand {
+            align-items: center;
+            display: inline-flex;
+            gap: 12px;
+        }
+
+        .brand-mark {
+            align-items: center;
+            background: linear-gradient(135deg, rgba(24, 51, 48, 0.96), rgba(24, 51, 48, 0.84));
+            border-radius: 18px;
+            color: #f7f1e6;
+            display: inline-flex;
+            font-family: var(--mono);
+            font-size: 0.84rem;
+            font-weight: 700;
+            height: 46px;
+            justify-content: center;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            width: 46px;
+        }
+
+        .brand-name {
+            font-family: var(--serif);
+            font-size: 1.22rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+        }
+
+        .site-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 18px;
+            justify-content: center;
+        }
+
+        .site-nav a {
+            color: var(--muted);
+            font-size: 0.94rem;
+            transition: color 160ms ease, transform 160ms ease;
+        }
+
+        .site-nav a:hover {
+            color: var(--ink);
+            transform: translateY(-1px);
+        }
+
+        .header-controls {
+            align-items: center;
+            display: inline-flex;
+            gap: 14px;
+            justify-self: end;
+        }
+
+        .header-email {
+            align-items: center;
+            background: var(--pine);
+            border-radius: var(--radius-pill);
+            color: #f7f1e6;
+            display: inline-flex;
+            font-size: 0.92rem;
+            font-weight: 600;
+            padding: 11px 16px;
+        }
+
+        .locale-switch {
+            align-items: center;
+            display: inline-flex;
+            gap: 8px;
+        }
+
+        .locale-label {
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .locale-pill {
+            background: rgba(255, 250, 243, 0.9);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-pill);
+            display: inline-flex;
+            padding: 4px;
+        }
+
+        .locale-btn {
+            border-radius: var(--radius-pill);
+            color: var(--muted);
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            transition: background 160ms ease, color 160ms ease;
+        }
+
+        .locale-btn.is-active {
+            background: var(--pine);
+            color: #f7f1e6;
+        }
+
+        main {
+            margin: 0 auto;
+            max-width: var(--content-width);
+        }
+
+        .section {
+            padding-top: 90px;
+        }
+
+        .section-head {
+            display: grid;
+            gap: 18px;
+            margin-bottom: 34px;
+            max-width: 740px;
+        }
+
+        .section-kicker {
+            color: var(--accent);
+            font-family: var(--mono);
+            font-size: 0.76rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-family: var(--serif);
+            font-size: clamp(2.4rem, 5vw, 4.6rem);
+            font-weight: 600;
+            letter-spacing: -0.055em;
+            line-height: 0.95;
+        }
+
+        .section-intro {
+            color: var(--muted);
+            font-size: 1.02rem;
+            line-height: 1.82;
+            max-width: 62ch;
+        }
+
+        .hero {
+            padding-top: 74px;
+        }
+
+        .hero-grid {
+            align-items: start;
+            display: grid;
+            gap: 28px;
+            grid-template-columns: minmax(0, 1fr) 360px;
+        }
+
+        .hero-main {
+            display: grid;
+            gap: 24px;
+            padding-top: 28px;
+            position: relative;
+        }
+
+        .hero-main::before {
+            background: linear-gradient(90deg, rgba(190, 104, 68, 0.18), transparent 68%);
+            border-radius: 999px;
+            content: "";
+            height: 6px;
             left: 0;
+            position: absolute;
+            top: 0;
+            width: min(220px, 42%);
+        }
+
+        .hero-name {
+            font-family: var(--serif);
+            font-size: clamp(4rem, 9vw, 8rem);
+            font-weight: 600;
+            letter-spacing: -0.09em;
+            line-height: 0.88;
+        }
+
+        .hero-kicker {
+            color: var(--accent);
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .hero-tagline {
+            font-family: var(--serif);
+            font-size: clamp(2.8rem, 6vw, 5.2rem);
+            font-weight: 600;
+            letter-spacing: -0.06em;
+            line-height: 0.92;
+            max-width: 12ch;
+        }
+
+        .hero-summary {
+            color: var(--muted);
+            font-size: 1.08rem;
+            line-height: 1.88;
+            max-width: 64ch;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .button {
+            align-items: center;
+            border-radius: var(--radius-pill);
+            display: inline-flex;
+            font-size: 0.95rem;
+            font-weight: 600;
+            gap: 10px;
+            justify-content: center;
+            padding: 14px 20px;
+            transition: transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        .button:hover {
+            box-shadow: 0 16px 32px rgba(23, 21, 19, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .button-primary {
+            background: var(--pine);
+            color: #f7f1e6;
+        }
+
+        .button-secondary {
+            background: rgba(255, 250, 243, 0.9);
+            border: 1px solid var(--line);
+            color: var(--ink);
+        }
+
+        .hero-availability {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .hero-availability li {
+            background: rgba(255, 250, 243, 0.86);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-pill);
+            color: var(--muted);
+            font-size: 0.88rem;
+            padding: 10px 14px;
+        }
+
+        .hero-side {
+            background: linear-gradient(180deg, rgba(255, 250, 243, 0.92), rgba(247, 241, 230, 0.94));
+            border: 1px solid rgba(23, 21, 19, 0.08);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            display: grid;
+            gap: 18px;
+            padding: 28px;
+            position: relative;
+        }
+
+        .hero-side::before {
+            border: 1px solid rgba(24, 51, 48, 0.12);
+            border-radius: inherit;
+            content: "";
+            inset: 12px -12px -12px 12px;
+            pointer-events: none;
+            position: absolute;
+            z-index: 0;
+        }
+
+        .hero-side::after {
+            background: linear-gradient(180deg, transparent, rgba(190, 104, 68, 0.08));
+            border-radius: inherit;
+            content: "";
+            inset: 0;
+            pointer-events: none;
+            position: absolute;
+        }
+
+        .hero-side > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .side-label {
+            color: var(--accent);
+            font-family: var(--mono);
+            font-size: 0.76rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .side-title {
+            font-family: var(--serif);
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: 1.02;
+        }
+
+        .side-list {
+            display: grid;
+            gap: 12px;
+            list-style: none;
+        }
+
+        .side-list li {
+            background: rgba(255, 250, 243, 0.82);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            color: var(--ink);
+            line-height: 1.66;
+            padding: 14px 16px;
+        }
+
+        .side-note {
+            color: var(--muted);
+            line-height: 1.76;
+        }
+
+        .quick-contact {
+            display: grid;
+            gap: 12px;
+        }
+
+        .quick-contact a {
+            align-items: center;
+            background: rgba(255, 250, 243, 0.82);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 16px;
+        }
+
+        .quick-contact strong {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .quick-contact span {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .cards-grid--now {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .cards-grid--services {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .card {
+            background: rgba(255, 250, 243, 0.82);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 18px 36px rgba(23, 21, 19, 0.05);
+            display: grid;
+            gap: 16px;
+            min-height: 100%;
+            padding: 24px;
+            position: relative;
+        }
+
+        .card::before {
+            background: linear-gradient(135deg, rgba(190, 104, 68, 0.14), transparent 45%);
+            border-radius: inherit;
+            content: "";
+            inset: 0;
+            pointer-events: none;
+            position: absolute;
+        }
+
+        .card::after {
+            border: 1px solid rgba(24, 51, 48, 0.10);
+            border-radius: inherit;
+            content: "";
+            inset: 10px -10px -10px 10px;
+            pointer-events: none;
+            position: absolute;
+            z-index: 0;
+        }
+
+        .card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-label {
+            color: var(--accent);
+            font-family: var(--mono);
+            font-size: 0.74rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .card-title {
+            font-family: var(--serif);
+            font-size: 1.72rem;
+            font-weight: 600;
+            letter-spacing: -0.045em;
+            line-height: 1.04;
+        }
+
+        .card-copy {
+            color: var(--muted);
+            line-height: 1.82;
+        }
+
+        .work-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+
+        .work-card {
+            grid-column: span 4;
+        }
+
+        .work-card--featured {
+            grid-column: span 7;
+            min-height: 320px;
+            padding: 30px;
+        }
+
+        .work-card--tall {
+            grid-column: span 5;
+        }
+
+        .tag-list,
+        .link-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .tag-list li {
+            background: rgba(255, 250, 243, 0.94);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-pill);
+            color: var(--muted);
+            font-size: 0.84rem;
+            padding: 8px 12px;
+        }
+
+        .link-list a {
+            color: var(--pine);
+            font-size: 0.94rem;
+            font-weight: 600;
+        }
+
+        .link-list a:hover {
             color: var(--accent);
         }
 
-        /* Panel animations */
-        .skill-panel-enter-active, .skill-panel-leave-active {
-            transition: opacity 0.3s;
-        }
-
-        .skill-panel-enter-active .skill-panel,
-        .skill-panel-leave-active .skill-panel {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .skill-panel-enter-from, .skill-panel-leave-to {
-            opacity: 0;
-        }
-
-        .skill-panel-enter-from .skill-panel,
-        .skill-panel-leave-to .skill-panel {
-            transform: translateX(100%);
-        }
-
-        /* Contact form */
-        .contact-form {
-            max-width: 600px;
-            margin: 3rem auto 0;
+        .notes-list {
+            border-top: 1px solid var(--line);
             display: grid;
-            gap: 1.5rem;
-            animation: fadeInCard 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-            animation-delay: 0.2s;
         }
 
-        .form-group {
+        .note-row {
+            border-bottom: 1px solid var(--line);
+            display: grid;
+            gap: 18px;
+            grid-template-columns: 180px 1fr auto;
+            padding: 22px 0;
+        }
+
+        .note-meta {
+            color: var(--accent);
+            font-family: var(--mono);
+            font-size: 0.76rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .note-title {
+            font-family: var(--serif);
+            font-size: 1.54rem;
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: 1.08;
+            margin-bottom: 8px;
+        }
+
+        .note-copy {
+            color: var(--muted);
+            line-height: 1.76;
+            max-width: 62ch;
+        }
+
+        .note-link {
+            align-items: center;
+            color: var(--pine);
+            display: inline-flex;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .contact-grid {
+            align-items: start;
+            display: grid;
+            gap: 26px;
+            grid-template-columns: minmax(0, 1fr) 360px;
+        }
+
+        .contact-main {
+            display: grid;
+            gap: 18px;
+        }
+
+        .contact-main p {
+            color: var(--muted);
+            line-height: 1.84;
+            max-width: 64ch;
+        }
+
+        .contact-side {
+            display: grid;
+            gap: 14px;
+        }
+
+        .contact-card {
+            background: rgba(255, 250, 243, 0.84);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            display: grid;
+            gap: 6px;
+            padding: 18px 20px;
+        }
+
+        .contact-card--offset {
+            margin-left: 18px;
+        }
+
+        .contact-label {
+            color: var(--accent);
+            font-family: var(--mono);
+            font-size: 0.74rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .contact-title {
+            font-size: 1.02rem;
+            font-weight: 700;
+        }
+
+        .contact-copy {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .contact-link {
+            color: var(--pine);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .site-footer {
+            border-top: 1px solid var(--line);
+            color: var(--muted);
             display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            justify-content: space-between;
+            margin-top: 84px;
+            padding: 22px 0 10px;
         }
 
-        .form-group:nth-child(1) { animation-delay: 0.3s; }
-        .form-group:nth-child(2) { animation-delay: 0.4s; }
-        .form-group:nth-child(3) { animation-delay: 0.5s; }
-
-        .form-label {
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            opacity: 0.7;
+        .site-footer span {
+            font-size: 0.92rem;
         }
 
-        .form-input, .form-textarea {
-            font-family: 'Crimson Pro', serif;
-            background: var(--surface);
-            border: 2px solid var(--border);
-            color: var(--fg);
-            padding: 1rem;
-            font-size: 16px;
-            transition: all 0.3s;
+        html[data-locale="zh"] body {
+            font-family: var(--sans-zh);
         }
 
-        .form-input:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
-            transform: translateY(-2px);
+        html[data-locale="zh"] .brand-name,
+        html[data-locale="zh"] .hero-name,
+        html[data-locale="zh"] .hero-tagline,
+        html[data-locale="zh"] .section-title,
+        html[data-locale="zh"] .card-title,
+        html[data-locale="zh"] .side-title,
+        html[data-locale="zh"] .note-title {
+            font-family: var(--serif-zh);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.08;
         }
 
-        .form-textarea {
-            min-height: 150px;
-            resize: vertical;
+        html[data-locale="zh"] .hero-grid {
+            grid-template-columns: 1fr;
         }
 
-        .form-submit {
-            font-family: 'DM Mono', monospace;
-            background: var(--accent);
-            color: var(--bg);
-            border: none;
-            padding: 1.2rem 2rem;
-            font-size: 14px;
-            letter-spacing: 0.15em;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
+        html[data-locale="zh"] .hero-side {
+            max-width: 620px;
         }
 
-        .form-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px var(--accent-glow);
+        html[data-locale="zh"] .hero-kicker,
+        html[data-locale="zh"] .section-kicker,
+        html[data-locale="zh"] .card-label,
+        html[data-locale="zh"] .note-meta,
+        html[data-locale="zh"] .contact-label,
+        html[data-locale="zh"] .locale-label {
+            letter-spacing: 0.08em;
+            text-transform: none;
         }
 
-        .form-submit:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        html[data-locale="zh"] .hero-name {
+            font-size: clamp(3.8rem, 7vw, 6rem);
+            line-height: 0.94;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero-stats {
-                gap: 2rem;
-            }
-            .projects-grid {
+        html[data-locale="zh"] .hero-tagline {
+            font-size: clamp(3rem, 6vw, 5.8rem);
+            line-height: 1.04;
+            max-width: 11.6ch;
+        }
+
+        html[data-locale="zh"] .hero-summary,
+        html[data-locale="zh"] .section-intro,
+        html[data-locale="zh"] .card-copy,
+        html[data-locale="zh"] .side-note,
+        html[data-locale="zh"] .contact-main p,
+        html[data-locale="zh"] .note-copy {
+            line-height: 1.95;
+        }
+
+        html[data-locale="zh"] .work-card--featured {
+            min-height: 340px;
+        }
+
+        html[data-locale="zh"] .note-row {
+            grid-template-columns: 150px 1fr auto;
+        }
+
+        @media (max-width: 1080px) {
+            .site-header__inner {
                 grid-template-columns: 1fr;
             }
-            body {
-                cursor: default;
+
+            .site-nav {
+                justify-content: flex-start;
             }
-            .search-box {
-                min-width: 100%;
+
+            .header-controls {
+                justify-self: start;
             }
-            .about-container {
-                grid-template-columns: 80px 1fr;
-                gap: 2rem;
+
+            .hero-grid,
+            .cards-grid--now,
+            .cards-grid--services,
+            .contact-grid {
+                grid-template-columns: 1fr;
             }
-            .about-text {
-                font-size: 18px;
+
+            .hero-side {
+                max-width: none;
+            }
+
+            .work-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .work-card,
+            .work-card--featured,
+            .work-card--tall {
+                grid-column: auto;
+            }
+
+            .note-row {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-card--offset {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .page-shell {
+                padding: 0 14px 28px;
+            }
+
+            .site-header {
+                border-radius: 22px;
+                top: 10px;
+                width: calc(100% - 12px);
+            }
+
+            .site-header__inner {
+                align-items: flex-start;
+                gap: 14px;
+                grid-template-columns: 1fr auto;
+                padding: 14px;
+            }
+
+            .site-nav {
+                display: none;
+            }
+
+            .header-controls {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+                justify-self: end;
+            }
+
+            .header-email {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 58px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .button,
+            .header-email {
+                width: 100%;
+            }
+
+            .card,
+            .hero-side {
+                padding: 20px;
+            }
+
+            .card::after,
+            .hero-side::before {
+                inset: 8px -8px -8px 8px;
+            }
+
+            .section {
+                padding-top: 78px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Cursor trails -->
-        <div v-for="i in 5" :key="i" class="cursor-trail" :ref="el => cursorTrails[i-1] = el"></div>
+    <div class="page-shell">
+        <header class="site-header">
+            <div class="site-header__inner">
+                <a class="brand" href="#top" aria-label="Iridite home">
+                    <span class="brand-mark">IR</span>
+                    <span class="brand-name">Iridite</span>
+                </a>
 
-        <!-- Theme toggle -->
-        <button class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
-            {{ theme === 'dark' ? '☀' : '☾' }}
-        </button>
+                <nav class="site-nav" aria-label="Primary">
+                    <a href="#now" id="nav-now">Now</a>
+                    <a href="#work" id="nav-work">Work</a>
+                    <a href="#notes" id="nav-notes">Notes</a>
+                    <a href="#services" id="nav-services">Services</a>
+                    <a href="#contact" id="nav-contact">Contact</a>
+                </nav>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="bg-shape"></div>
-            <div class="bg-shape"></div>
-            <div class="bg-shape"></div>
+                <div class="header-controls">
+                    <a class="header-email" id="header-email" href="mailto:iridite@foxmail.com">Start a conversation</a>
 
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    <span>I</span><span>R</span><span>I</span><span>D</span><span>I</span><span>T</span><span>E</span>
-                </h1>
-                <p class="hero-subtitle">System Architect × Web3 Builder × Open for Jobs</p>
-
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number" :class="{ loading: loading }">{{ projects.length }}</span>
-                        <span class="stat-label">Projects</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" :class="{ loading: loading }">{{ totalStars }}</span>
-                        <span class="stat-label">Stars</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" :class="{ loading: loading }">{{ totalForks }}</span>
-                        <span class="stat-label">Forks</span>
-                    </div>
-                </div>
-
-                <div class="hero-links">
-                    <a href="https://github.com/iridite" target="_blank" class="hero-link">GITHUB</a>
-                    <a href="https://twitter.com/iridite_" target="_blank" class="hero-link">TWITTER</a>
-                    <a href="https://iridum.eu.org" target="_blank" class="hero-link">BLOG</a>
-                </div>
-            </div>
-
-            <div class="scroll-indicator">SCROLL ↓</div>
-        </section>
-
-        <!-- About Section -->
-        <section class="about-section">
-            <div class="about-container">
-                <div class="quote-mark">"</div>
-                <div class="about-content">
-                    <p class="about-text">
-                        System architect building at the intersection of AI and Web3. From medical AI frameworks to decentralized governance tools, I create systems that amplify individual sovereignty. Currently exploring Solana ecosystem through OpenBuild community and Solana Foundation programs, while architecting AI-powered automation pipelines.
-                    </p>
-                    <p class="about-signature">
-                        — <strong>Iridite</strong>, System Architect
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section class="section">
-            <div class="section-header">
-                <h2 class="section-title" data-text="PROJECTS">PROJECTS</h2>
-                <p class="section-subtitle">Open Source Work</p>
-            </div>
-
-            <div class="controls">
-                <div class="controls-row">
-                    <input
-                        type="text"
-                        v-model="searchQuery"
-                        placeholder="Search projects..."
-                        class="search-box"
-                    >
-                    <select v-model="sortBy" class="sort-select">
-                        <option value="stars">Sort by Stars</option>
-                        <option value="updated">Sort by Updated</option>
-                    </select>
-                </div>
-                <div class="controls-row">
-                    <button
-                        v-for="tech in allTechs"
-                        :key="tech"
-                        @click="toggleFilter(tech)"
-                        :class="['filter-btn', { active: activeFilters.includes(tech) }]"
-                    >
-                        {{ tech }}
-                    </button>
-                </div>
-            </div>
-
-            <div class="projects-grid">
-                <div v-for="project in displayedProjects" :key="project.name" class="project-card">
-                    <div class="project-header">
-                        <h3 class="project-name">{{ project.name }}</h3>
-                        <span class="project-stars">
-                            <span>★</span>
-                            <span :class="{ loading: loading }">{{ project.stars }}</span>
-                        </span>
-                    </div>
-                    <p class="project-desc">{{ project.description }}</p>
-                    <div class="project-tech">
-                        <span v-for="tech in project.tech" :key="tech" class="tech-tag">{{ tech }}</span>
-                    </div>
-                    <div class="project-links">
-                        <a :href="project.github" target="_blank" class="project-link">VIEW CODE →</a>
-                        <a v-if="project.demo" :href="project.demo" target="_blank" class="project-link">LIVE DEMO →</a>
-                    </div>
-                </div>
-            </div>
-
-            <button
-                v-if="!showAllProjects && filteredProjects.length > 6 && !searchQuery && activeFilters.length === 0"
-                @click="showAllProjects = true"
-                class="expand-btn"
-            >
-                SHOW ALL {{ filteredProjects.length }} PROJECTS
-            </button>
-        </section>
-
-        <!-- Skills Section -->
-        <section class="skills-section">
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title" data-text="SKILLS">SKILLS</h2>
-                    <p class="section-subtitle">Tech Stack</p>
-                </div>
-                <div class="skills-grid">
-                    <div v-for="skill in skills" :key="skill.name" class="skill-item" @click="openSkillDetail(skill)">
-                        <span class="skill-icon">{{ skill.icon }}</span>
-                        <h3 class="skill-name">{{ skill.name }}</h3>
-                        <p class="skill-level">{{ skill.level }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Skill Detail Panel -->
-            <transition name="skill-panel">
-                <div v-if="selectedSkill" class="skill-panel-overlay" @click="closeSkillDetail">
-                    <div class="skill-panel" @click.stop>
-                        <button class="skill-panel-close" @click="closeSkillDetail">×</button>
-                        <div class="skill-panel-content">
-                            <span class="skill-panel-icon">{{ selectedSkill.icon }}</span>
-                            <h2 class="skill-panel-title">{{ selectedSkill.name }}</h2>
-                            <p class="skill-panel-level">{{ selectedSkill.level }}</p>
-                            <div class="skill-panel-divider"></div>
-                            <p class="skill-panel-description">{{ selectedSkill.description }}</p>
-                            <div class="skill-panel-projects">
-                                <h3 class="skill-panel-projects-title">Key Projects</h3>
-                                <ul class="skill-panel-projects-list">
-                                    <li v-for="project in selectedSkill.projects" :key="project">{{ project }}</li>
-                                </ul>
-                            </div>
+                    <div class="locale-switch" aria-label="Language switcher">
+                        <span class="locale-label" id="locale-label">Lang</span>
+                        <div class="locale-pill">
+                            <button class="locale-btn" type="button" data-locale-btn="en">ENG</button>
+                            <button class="locale-btn" type="button" data-locale-btn="zh">中文</button>
                         </div>
                     </div>
                 </div>
-            </transition>
-        </section>
+            </div>
+        </header>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <h2 class="footer-title">GET IN TOUCH</h2>
-            <p class="footer-email">iridite@foxmail.com</p>
+        <main id="top">
+            <section class="section hero">
+                <div class="hero-grid">
+                    <div class="hero-main">
+                        <p class="hero-kicker" id="hero-kicker">Personal portfolio / collaboration front door</p>
+                        <h1 class="hero-name">Iridite</h1>
+                        <p class="hero-tagline" id="hero-tagline">AI application engineer building research support, workflow systems, and a portfolio grounded in real work.</p>
+                        <p class="hero-summary" id="hero-summary">
+                            By day I work in AI in Shanghai. After hours I build MedFusion, research delivery materials, and public notes on AI systems, workflow design, and slow compounding. This page is my personal portfolio and the clearest entry point for collaboration or paid consultation.
+                        </p>
 
-            <form class="contact-form" @submit.prevent="handleSubmit">
-                <div class="form-group">
-                    <label class="form-label">Name</label>
-                    <input type="text" v-model="form.name" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" v-model="form.email" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Message</label>
-                    <textarea v-model="form.message" class="form-textarea" required></textarea>
-                </div>
-                <button type="submit" class="form-submit" :disabled="submitting">
-                    {{ submitting ? 'Sending...' : 'Send Message' }}
-                </button>
-            </form>
+                        <div class="hero-actions">
+                            <a class="button button-primary" id="hero-primary" href="#work">Selected work</a>
+                            <a class="button button-secondary" id="hero-secondary" href="#services">Collaboration / consultation</a>
+                        </div>
 
-            <p style="margin-top: 3rem; opacity: 0.3; font-size: 12px;">Building the future, one commit at a time</p>
+                        <ul class="hero-availability" id="hero-availability"></ul>
+                    </div>
+
+                    <aside class="hero-side">
+                        <p class="side-label" id="side-label">Open to</p>
+                        <h2 class="side-title" id="side-title">Collaboration, consulting, and serious technical conversations</h2>
+                        <ul class="side-list" id="side-list"></ul>
+                        <p class="side-note" id="side-note">
+                            Best first contact is email. If you already know the problem you are trying to solve, send a short note with context, goal, and timeline.
+                        </p>
+
+                        <div class="quick-contact" id="quick-contact"></div>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="section" id="now">
+                <div class="section-head">
+                    <p class="section-kicker" id="now-kicker">What I am doing now</p>
+                    <h2 class="section-title" id="now-title">The line is narrower on purpose.</h2>
+                    <p class="section-intro" id="now-intro">
+                        This site is not trying to summarize every skill I have. It is here to make the current line legible: medical prediction research support, workflow systems, and a public body of work that grows from the same line.
+                    </p>
+                </div>
+
+                <div class="cards-grid cards-grid--now" id="now-grid"></div>
+            </section>
+
+            <section class="section" id="work">
+                <div class="section-head">
+                    <p class="section-kicker" id="work-kicker">Selected work</p>
+                    <h2 class="section-title" id="work-title">Proofs that are closer to how I actually work.</h2>
+                    <p class="section-intro" id="work-intro">
+                        Fewer projects, better context. The goal is not to look busy. The goal is to make it easy to see what I build, why it matters, and where collaboration could start.
+                    </p>
+                </div>
+
+                <div class="work-grid" id="work-grid"></div>
+            </section>
+
+            <section class="section" id="notes">
+                <div class="section-head">
+                    <p class="section-kicker" id="notes-kicker">Recent notes</p>
+                    <h2 class="section-title" id="notes-title">Public writing, not content theater.</h2>
+                    <p class="section-intro" id="notes-intro">
+                        Most of what I publish is written close to the work itself: systems, workflow friction, publishing resistance, and how to build a second line while living inside a normal workweek.
+                    </p>
+                </div>
+
+                <div class="notes-list" id="notes-list"></div>
+            </section>
+
+            <section class="section" id="services">
+                <div class="section-head">
+                    <p class="section-kicker" id="services-kicker">How we can work together</p>
+                    <h2 class="section-title" id="services-title">A few clear entry points are better than a vague promise.</h2>
+                    <p class="section-intro" id="services-intro">
+                        This is early-stage collaboration, advisory, and paid consultation. The point is to clarify the problem, design a sane path, and reduce the cost of going in the wrong direction.
+                    </p>
+                </div>
+
+                <div class="cards-grid cards-grid--services" id="services-grid"></div>
+            </section>
+
+            <section class="section" id="contact">
+                <div class="contact-grid">
+                    <div class="contact-main">
+                        <p class="section-kicker" id="contact-kicker">Contact</p>
+                        <h2 class="section-title" id="contact-title">If the work is relevant, it should be easy to reach me.</h2>
+                        <p id="contact-body-1">
+                            If you want to talk about research support, workflow design, AI system planning, or a concrete paid consultation, the contact methods below are the fastest way in.
+                        </p>
+                        <p id="contact-body-2">
+                            The simplest path is still email. If you already know what you want to discuss, send the problem, current state, and what kind of help you expect.
+                        </p>
+                        <div class="hero-actions">
+                            <a class="button button-primary" id="contact-primary" href="mailto:iridite@foxmail.com">Email for collaboration</a>
+                            <a class="button button-secondary" id="contact-secondary" href="mailto:iridite@foxmail.com?subject=Paid%20consultation">Paid consultation</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-side" id="contact-side"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <span id="footer-name">Iridite</span>
+            <span id="footer-year"></span>
+            <span id="footer-tagline">AI application engineer / medical prediction research support / workflow systems</span>
         </footer>
     </div>
 
     <script>
-        const { createApp } = Vue;
-
-        createApp({
-            data() {
-                return {
-                    theme: localStorage.getItem('theme') || 'dark',
-                    loading: true,
-                    cursorTrails: [],
-                    mouseX: 0,
-                    mouseY: 0,
-                    searchQuery: '',
-                    activeFilters: [],
-                    submitting: false,
-                    showAllProjects: false,
-                    sortBy: 'stars',
-                    selectedSkill: null,
-                    form: {
-                        name: '',
-                        email: '',
-                        message: ''
-                    },
-                    skills: [
-                        {
-                            name: 'Python',
-                            icon: '🐍',
-                            level: 'Expert',
-                            description: 'Building AI automation pipelines and medical ML frameworks',
-                            projects: ['Matrix: AI-powered content pipeline', 'MedFusion: Medical multimodal fusion', 'Bing Search MCP: Claude integration']
-                        },
-                        {
-                            name: 'Rust',
-                            icon: '🦀',
-                            level: 'Advanced',
-                            description: 'High-performance systems and medical AI infrastructure',
-                            projects: ['MedFusion core engine', 'System-level optimization', 'Performance-critical components']
-                        },
-                        {
-                            name: 'Web3/Solana',
-                            icon: '⛓️',
-                            level: 'Learning',
-                            description: 'Building decentralized governance and decision-making tools',
-                            projects: ['Decisify: Solana Hackathon project', 'OpenBuild community participant', 'Solana Foundation training program']
-                        },
-                        {
-                            name: 'TypeScript',
-                            icon: '📘',
-                            level: 'Advanced',
-                            description: 'Cloud-native deployments and full-stack applications',
-                            projects: ['NodeWarden: Bitwarden on Cloudflare', 'RSSHub on Vercel', 'OpenClawer dashboard']
-                        },
-                        {
-                            name: 'AI/ML',
-                            icon: '🤖',
-                            level: 'Expert',
-                            description: 'Medical AI, autonomous agents, and content intelligence',
-                            projects: ['29 vision backbones integration', 'AI agent platforms', 'Multimodal fusion strategies']
-                        },
-                        {
-                            name: 'Cloud',
-                            icon: '☁️',
-                            level: 'Advanced',
-                            description: 'Serverless architectures and edge computing',
-                            projects: ['Cloudflare Workers + R2', 'Vercel deployments', 'Distributed systems']
-                        }
+        const COPY = {
+            en: {
+                pageTitle: "Iridite - AI application engineer portfolio",
+                metaDescription: "Iridite is an AI application engineer in Shanghai building medical prediction research support, workflow systems, and a public-facing portfolio for collaboration and paid consultation.",
+                localeLabel: "Lang",
+                headerEmail: "Start a conversation",
+                nav: {
+                    now: "Now",
+                    work: "Work",
+                    notes: "Notes",
+                    services: "Services",
+                    contact: "Contact"
+                },
+                hero: {
+                    kicker: "Personal portfolio / collaboration front door",
+                    tagline: "AI application engineer building research support, workflow systems, and a portfolio grounded in real work.",
+                    summary: "By day I work in AI in Shanghai. After hours I build MedFusion, research delivery materials, and public notes on AI systems, workflow design, and slow compounding. This page is my personal portfolio and the clearest entry point for collaboration or paid consultation.",
+                    primary: "Selected work",
+                    secondary: "Collaboration / consultation",
+                    availability: [
+                        "Medical prediction research support",
+                        "Workflow and tool design",
+                        "Advisory / paid consultation"
                     ],
-                    projects: [
+                    sideLabel: "Open to",
+                    sideTitle: "Collaboration, consulting, and serious technical conversations",
+                    sideList: [
+                        "Research questions that need a clearer technical starting point",
+                        "Workflow design for teams or individuals who want to reduce friction",
+                        "Paid consultation on AI tooling, project framing, and implementation direction"
+                    ],
+                    sideNote: "Best first contact is email. If you already know the problem you are trying to solve, send a short note with context, goal, and timeline.",
+                    quickContact: [
+                        { title: "Email", caption: "Serious collaboration", href: "mailto:iridite@foxmail.com" },
+                        { title: "Telegram", caption: "Fast reach-out", href: "https://t.me/eubd37" },
+                        { title: "GitHub", caption: "Code proof", href: "https://github.com/iridite" }
+                    ]
+                },
+                now: {
+                    kicker: "What I am doing now",
+                    title: "The line is narrower on purpose.",
+                    intro: "This site is not trying to summarize every skill I have. It is here to make the current line legible: medical prediction research support, workflow systems, and a public body of work that grows from the same line.",
+                    items: [
                         {
-                            name: 'decisify',
-                            description: 'Decentralized decision-making platform on Solana - Hackathon project for transparent governance',
-                            tech: ['Solana', 'Web3', 'JavaScript'],
-                            stars: 0,
-                            forks: 0,
-                            github: 'https://github.com/iridite/decisify',
-                            demo: null,
-                            updated_at: null
+                            label: "01 / Main line",
+                            title: "Medical prediction research support",
+                            body: "Helping clinicians and researchers move from a vague problem and messy data toward a feasible first run."
                         },
                         {
-                            name: 'openclawer',
-                            description: 'One key OpenClaw deployment - Deploy and manage OpenClaw AI agents with fnOS',
-                            tech: ['JavaScript', 'fnOS', 'Dashboard'],
-                            stars: 0,
-                            forks: 0,
-                            github: 'https://github.com/iridite/openclawer',
-                            demo: null
+                            label: "02 / Engine",
+                            title: "MedFusion and workflow systems",
+                            body: "Building the internal engine, result packaging, and repeatable workflow structures before pretending it is already a polished product."
                         },
                         {
-                            name: 'medfusion',
-                            description: '🏥 Modular medical multimodal fusion framework with 29 vision backbones, 5 fusion strategies, and multi-view support',
-                            tech: ['Python', 'Rust', 'Medical AI'],
-                            stars: 0,
-                            forks: 0,
-                            github: 'https://github.com/iridyne/medfusion',
-                            demo: null
-                        },
-                        {
-                            name: 'matrix',
-                            description: '全自动内容降维打击流水线 - RSS → AI 过滤 → AI 改写 → Notion 存储',
-                            tech: ['Python', 'AI', 'Automation'],
-                            stars: 0,
-                            forks: 0,
-                            github: 'https://github.com/iridite/matrix',
-                            demo: null
-                        },
-                        {
-                            name: 'nodewarden-enhanced',
-                            description: 'Enhanced Bitwarden deployment with Cloudflare Workers and R2 storage',
-                            tech: ['TypeScript', 'Cloudflare', 'R2'],
-                            stars: 0,
-                            forks: 0,
-                            github: 'https://github.com/iridite/nodewarden-enhanced',
-                            demo: 'https://nodewarden.nekorect.workers.dev'
-                        },
-                        {
-                            name: 'bing-search-mcp',
-                            description: 'Free Bing search MCP server for Claude Code - No API key required',
-                            tech: ['Python', 'MCP', 'Search'],
-                            stars: 0,
-                            forks: 0,
-                            github: 'https://github.com/iridite/bing-search-mcp',
-                            demo: null
-                        },
-                        {
-                            name: 'rsshub-vercel',
-                            description: 'RSSHub deployment on Vercel for easy RSS feed generation',
-                            tech: ['TypeScript', 'Vercel', 'RSS'],
-                            stars: 0,
-                            forks: 0,
-                            github: 'https://github.com/iridite/rsshub-vercel',
-                            demo: 'https://rsshub-vercel-teal.vercel.app'
+                            label: "03 / Public work",
+                            title: "Notes written close to the work",
+                            body: "Publishing AI practice, delivery friction, and workflow thinking so the public-facing side still grows from real work."
                         }
                     ]
-                }
-            },
-            computed: {
-                totalStars() {
-                    return this.projects.reduce((sum, p) => sum + p.stars, 0);
                 },
-                totalForks() {
-                    return this.projects.reduce((sum, p) => sum + p.forks, 0);
-                },
-                allTechs() {
-                    const techs = new Set();
-                    this.projects.forEach(p => p.tech.forEach(t => techs.add(t)));
-                    return Array.from(techs).sort();
-                },
-                sortedProjects() {
-                    return [...this.projects].sort((a, b) => {
-                        if (this.sortBy === 'stars') {
-                            return b.stars - a.stars || new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+                work: {
+                    kicker: "Selected work",
+                    title: "Proofs that are closer to how I actually work.",
+                    intro: "Fewer projects, better context. The goal is not to look busy. The goal is to make it easy to see what I build, why it matters, and where collaboration could start.",
+                    items: [
+                        {
+                            label: "Research workflow / core project",
+                            title: "MedFusion",
+                            body: "The main long-horizon project. A medical multimodal modeling and workflow engine meant to make prediction-model research more reproducible from validation to result packaging.",
+                            tags: ["Medical AI", "Reproducibility", "Multimodal workflows"],
+                            links: [
+                                { label: "GitHub ->", href: "https://github.com/iridyne/medfusion" }
+                            ],
+                            featured: true
+                        },
+                        {
+                            label: "Collaboration materials",
+                            title: "Research delivery packs",
+                            body: "Doctor-facing explainers, data audits, feasibility notes, and meeting materials that help technical work become legible in real collaboration.",
+                            tags: ["Clinical collaboration", "Data QA", "Research delivery"],
+                            links: [
+                                { label: "Discuss this work ->", href: "mailto:iridite@foxmail.com?subject=Research%20delivery%20packs" }
+                            ],
+                            tall: true
+                        },
+                        {
+                            label: "Public portfolio system",
+                            title: "Workflow and writing stack",
+                            body: "The operational side behind public notes and portfolio output: content systems, knowledge capture, bilingual positioning, and the AI-assisted process that keeps them moving.",
+                            tags: ["AI workflow", "Knowledge systems", "Public writing"],
+                            links: [
+                                { label: "See public notes ->", href: "#notes" }
+                            ]
                         }
-                        return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
-                    });
+                    ]
                 },
-                filteredProjects() {
-                    let filtered = this.sortedProjects;
-
-                    if (this.searchQuery) {
-                        const query = this.searchQuery.toLowerCase();
-                        filtered = filtered.filter(p =>
-                            p.name.toLowerCase().includes(query) ||
-                            p.description.toLowerCase().includes(query)
-                        );
-                    }
-
-                    if (this.activeFilters.length > 0) {
-                        filtered = filtered.filter(p =>
-                            this.activeFilters.some(f => p.tech.includes(f))
-                        );
-                    }
-
-                    return filtered;
-                },
-                displayedProjects() {
-                    if (this.showAllProjects || this.searchQuery || this.activeFilters.length > 0) {
-                        return this.filteredProjects;
-                    }
-                    return this.filteredProjects.slice(0, 6);
-                }
-            },
-            methods: {
-                toggleTheme() {
-                    this.theme = this.theme === 'dark' ? 'light' : 'dark';
-                    localStorage.setItem('theme', this.theme);
-                    document.documentElement.setAttribute('data-theme', this.theme);
-                },
-                toggleFilter(tech) {
-                    const index = this.activeFilters.indexOf(tech);
-                    if (index > -1) {
-                        this.activeFilters.splice(index, 1);
-                    } else {
-                        this.activeFilters.push(tech);
-                    }
-                },
-                openSkillDetail(skill) {
-                    this.selectedSkill = skill;
-                    document.body.style.overflow = 'hidden';
-                },
-                closeSkillDetail() {
-                    this.selectedSkill = null;
-                    document.body.style.overflow = '';
-                },
-                async handleSubmit() {
-                    this.submitting = true;
-
-                    // Formspree integration
-                    try {
-                        const response = await fetch('https://formspree.io/f/xanyqvpb', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.form)
-                        });
-
-                        if (response.ok) {
-                            alert('Message sent successfully!');
-                            this.form = { name: '', email: '', message: '' };
-                        } else {
-                            alert('Failed to send message. Please email directly.');
+                notes: {
+                    kicker: "Recent notes",
+                    title: "Public writing, not content theater.",
+                    intro: "Most of what I publish is written close to the work itself: systems, workflow friction, publishing resistance, and how to build a second line while living inside a normal workweek.",
+                    items: [
+                        {
+                            meta: "Published / X Article",
+                            title: "Before upgrading your stock position, upgrade your production system",
+                            body: "A note about leverage that starts from a small real-world order and ends in a harder question: what should be upgraded first so future work gets less fragile?",
+                            href: "https://x.com/iridite_/article/2043949955015160118",
+                            linkLabel: "Read article ->"
+                        },
+                        {
+                            meta: "Public thread",
+                            title: "Why technical people keep rebuilding setup instead of publishing",
+                            body: "Not a tool rant. A note about how setup, optimization, and full-prepared anxiety become a socially acceptable way to avoid being seen.",
+                            href: "https://x.com/iridite_",
+                            linkLabel: "See the thread ->"
+                        },
+                        {
+                            meta: "Next note",
+                            title: "How to build an AI workflow after work without making it too heavy",
+                            body: "The next direction for the site: systems that can survive tired evenings, limited attention, and the reality of a normal job.",
+                            href: "https://x.com/iridite_",
+                            linkLabel: "Follow updates ->"
                         }
-                    } catch (error) {
-                        alert('Failed to send message. Please email directly.');
-                    } finally {
-                        this.submitting = false;
-                    }
+                    ]
                 },
-                async fetchGitHubStats() {
-                    this.loading = true;
-                    const username = 'iridite';
-
-                    try {
-                        const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
-                        const repos = await response.json();
-
-                        // Get all public repos
-                        const publicRepos = repos.filter(r => !r.fork && !r.private);
-
-                        // Update existing projects
-                        this.projects.forEach(project => {
-                            const repoName = project.github.split('/').pop();
-                            const repo = publicRepos.find(r => r.name === repoName);
-                            if (repo) {
-                                project.stars = repo.stargazers_count;
-                                project.forks = repo.forks_count;
-                                project.updated_at = repo.updated_at;
-                            }
-                        });
-
-                        // Add any missing public repos
-                        publicRepos.forEach(repo => {
-                            const exists = this.projects.some(p => p.github.includes(repo.name));
-                            if (!exists) {
-                                this.projects.push({
-                                    name: repo.name,
-                                    description: repo.description || 'No description available',
-                                    tech: repo.language ? [repo.language] : [],
-                                    stars: repo.stargazers_count,
-                                    forks: repo.forks_count,
-                                    github: repo.html_url,
-                                    demo: repo.homepage || null,
-                                    updated_at: repo.updated_at
-                                });
-                            }
-                        });
-                    } catch (error) {
-                        console.error('Failed to fetch GitHub stats:', error);
-                    } finally {
-                        this.loading = false;
-                    }
-                },
-                handleMouseMove(e) {
-                    this.mouseX = e.clientX;
-                    this.mouseY = e.clientY;
-
-                    // Animate cursor trails
-                    this.cursorTrails.forEach((trail, index) => {
-                        if (trail) {
-                            setTimeout(() => {
-                                trail.style.left = e.clientX + 'px';
-                                trail.style.top = e.clientY + 'px';
-                                trail.style.opacity = '1';
-                                setTimeout(() => {
-                                    trail.style.opacity = '0';
-                                }, 300);
-                            }, index * 50);
+                services: {
+                    kicker: "How we can work together",
+                    title: "A few clear entry points are better than a vague promise.",
+                    intro: "This is early-stage collaboration, advisory, and paid consultation. The point is to clarify the problem, design a sane path, and reduce the cost of going in the wrong direction.",
+                    items: [
+                        {
+                            label: "01 / Feasibility review",
+                            title: "Research feasibility check",
+                            body: "Clarify the target, inspect the data situation, and identify whether the current prediction-model idea is worth pushing or should be reframed."
+                        },
+                        {
+                            label: "02 / Workflow design",
+                            title: "Workflow and system setup",
+                            body: "Design a lighter, more repeatable path for research support, AI tools, result packaging, and collaboration handoff."
+                        },
+                        {
+                            label: "03 / Paid consultation",
+                            title: "Advisory on AI tooling and direction",
+                            body: "A direct conversation about project framing, tooling choices, implementation direction, and how to avoid wasting months on the wrong version."
                         }
-                    });
+                    ]
+                },
+                contact: {
+                    kicker: "Contact",
+                    title: "If the work is relevant, it should be easy to reach me.",
+                    body1: "If you want to talk about research support, workflow design, AI system planning, or a concrete paid consultation, the contact methods below are the fastest way in.",
+                    body2: "The simplest path is still email. If you already know what you want to discuss, send the problem, current state, and what kind of help you expect.",
+                    primary: "Email for collaboration",
+                    secondary: "Paid consultation",
+                    cards: [
+                        {
+                            label: "Email",
+                            title: "Primary contact",
+                            body: "Best for collaboration, project discussions, and anything that needs context.",
+                            href: "mailto:iridite@foxmail.com",
+                            linkLabel: "iridite@foxmail.com ->"
+                        },
+                        {
+                            label: "X / Twitter",
+                            title: "Public updates",
+                            body: "Follow the public-facing side of the work, new notes, and ongoing positioning.",
+                            href: "https://x.com/iridite_",
+                            linkLabel: "@iridite_ ->",
+                            offset: true
+                        },
+                        {
+                            label: "Telegram",
+                            title: "Faster reach-out",
+                            body: "Useful if you already know you want to talk and do not want to start with a long email.",
+                            href: "https://t.me/eubd37",
+                            linkLabel: "t.me/eubd37 ->"
+                        },
+                        {
+                            label: "GitHub",
+                            title: "Code and proof",
+                            body: "See public repositories, utilities, and the engineering side of the portfolio.",
+                            href: "https://github.com/iridite",
+                            linkLabel: "github.com/iridite ->"
+                        }
+                    ]
+                },
+                footer: {
+                    name: "Iridite",
+                    tagline: "AI application engineer / medical prediction research support / workflow systems"
                 }
             },
-            mounted() {
-                document.documentElement.setAttribute('data-theme', this.theme);
-                this.fetchGitHubStats();
-
-                // Refresh stats every 5 minutes
-                setInterval(() => {
-                    this.fetchGitHubStats();
-                }, 300000);
-
-                // Cursor trail effect
-                if (window.innerWidth > 768) {
-                    document.addEventListener('mousemove', this.handleMouseMove);
+            zh: {
+                pageTitle: "Iridite - AI 应用工程师个人作品与合作入口",
+                metaDescription: "Iridite 是在上海工作的 AI 应用工程师，主线在做医疗预测研究支持、工作流系统，以及一个面向合作与付费咨询的个人 portfolio。",
+                localeLabel: "语言",
+                headerEmail: "发起合作沟通",
+                nav: {
+                    now: "现在在做",
+                    work: "项目作品",
+                    notes: "公开笔记",
+                    services: "合作方式",
+                    contact: "联系我"
+                },
+                hero: {
+                    kicker: "个人 portfolio / 对外合作入口",
+                    tagline: "医疗预测研究支持、AI 工作流系统，以及一个从真实工作里长出来的个人作品页。",
+                    summary: "白天我在上海做 AI 应用工程，晚上推进 MedFusion、研究交付材料，以及关于 AI 系统、工作流和第二收入线的公开记录。这页既是我的个人 portfolio，也是合作沟通和付费咨询的入口。",
+                    primary: "查看项目作品",
+                    secondary: "看合作方式",
+                    availability: [
+                        "医疗预测研究支持",
+                        "工作流与系统设计",
+                        "咨询 / 付费沟通"
+                    ],
+                    sideLabel: "当前开放",
+                    sideTitle: "合作、咨询，以及认真一点的技术对话",
+                    sideList: [
+                        "需要把一个研究问题梳理成更清楚的技术起点",
+                        "想把研究支持、AI 工具或交付流程做得更轻、更稳",
+                        "想付费聊项目方向、工具选择、实现路径，避免几个月走错方向"
+                    ],
+                    sideNote: "最推荐的初始联系还是邮件。如果你已经知道自己要解决什么问题，直接附上背景、目标和时间线，会更高效。",
+                    quickContact: [
+                        { title: "Email", caption: "认真合作", href: "mailto:iridite@foxmail.com" },
+                        { title: "Telegram", caption: "快速联系", href: "https://t.me/eubd37" },
+                        { title: "GitHub", caption: "代码证明", href: "https://github.com/iridite" }
+                    ]
+                },
+                now: {
+                    kicker: "我现在主要在做什么",
+                    title: "我故意把这条线收得更窄一些。",
+                    intro: "这页不是为了把我碰过的技术全都列一遍，而是为了把当前真正重要的主线讲清楚：医疗预测研究支持、工作流系统，以及从同一条主线里长出来的公开作品。",
+                    items: [
+                        {
+                            label: "01 / 主线",
+                            title: "医疗预测研究支持",
+                            body: "帮助临床研究者把一个模糊问题、杂乱数据和发文目标，推进到一轮真正可试跑的实验。"
+                        },
+                        {
+                            label: "02 / 底层引擎",
+                            title: "MedFusion 与工作流系统",
+                            body: "先把内部引擎、结果整理和可重复交付做对，再去谈产品化，而不是反过来。"
+                        },
+                        {
+                            label: "03 / 公开作品",
+                            title: "从真实工作里长出来的公开表达",
+                            body: "持续写 AI 实战、交付摩擦、发布阻力和工作流判断，让公开内容和真实工作始终接在一起。"
+                        }
+                    ]
+                },
+                work: {
+                    kicker: "项目作品",
+                    title: "少一点堆砌，多一点真正能代表我。",
+                    intro: "我希望这里放的，不是一个看起来很忙的仓库列表，而是更贴近我现在怎么工作、为什么值得合作的那几类作品。",
+                    items: [
+                        {
+                            label: "研究工作流 / 主项目",
+                            title: "MedFusion",
+                            body: "当前最重要的长期项目。它是医疗多模态建模与研究工作流引擎，目标是让预测模型研究从校验到结果整理都更可复盘、更稳定。",
+                            tags: ["医疗 AI", "可复盘", "多模态工作流"],
+                            links: [
+                                { label: "GitHub ->", href: "https://github.com/iridyne/medfusion" }
+                            ],
+                            featured: true
+                        },
+                        {
+                            label: "协作交付材料",
+                            title: "研究交付包",
+                            body: "给医生看的解释材料、数据审计、可行性笔记和会面材料。这些内容更安静，但更接近真实合作关系里的价值。",
+                            tags: ["临床协作", "数据 QA", "研究交付"],
+                            links: [
+                                { label: "聊聊这类合作 ->", href: "mailto:iridite@foxmail.com?subject=Research%20delivery%20packs" }
+                            ],
+                            tall: true
+                        },
+                        {
+                            label: "公开作品系统",
+                            title: "工作流与公开写作系统",
+                            body: "围绕 portfolio 和公开内容搭出来的那一套：AI 工作流、知识收集、双语定位、以及让输出不断档的运营系统。",
+                            tags: ["AI 工作流", "知识系统", "公开写作"],
+                            links: [
+                                { label: "看公开笔记 ->", href: "#notes" }
+                            ]
+                        }
+                    ]
+                },
+                notes: {
+                    kicker: "公开笔记",
+                    title: "写作不是表演，而是构建的一部分。",
+                    intro: "我公开写的大多都离工作很近：系统、工作流阻力、发布摩擦，以及正常工作周里怎么把第二条线慢慢做出来。",
+                    items: [
+                        {
+                            meta: "已发布 / X Article",
+                            title: "穷的时候，最该升级的不是股票仓位，而是你自己的生产系统",
+                            body: "从一个真实小单子切进去，最后落在更硬的问题上：钱紧的时候，到底先升级什么，才能让未来的工作没那么脆弱？",
+                            href: "https://x.com/iridite_/article/2043949955015160118",
+                            linkLabel: "读文章 ->"
+                        },
+                        {
+                            meta: "公开长帖",
+                            title: "技术人为什么总在搭环境，却迟迟不开始输出",
+                            body: "不是反工具，而是直面一个更真实的问题：搭环境、调系统、追求 full prepared，很多时候其实是在逃避被看见。",
+                            href: "https://x.com/iridite_",
+                            linkLabel: "看这条记录 ->"
+                        },
+                        {
+                            meta: "下一条方向",
+                            title: "白天上班的人，晚上怎么低成本搭自己的 AI 工作流",
+                            body: "下一条会更贴近这页的定位：真正能活过疲惫工作日的系统，不一定最强，但一定更能被坚持下来。",
+                            href: "https://x.com/iridite_",
+                            linkLabel: "继续关注 ->"
+                        }
+                    ]
+                },
+                services: {
+                    kicker: "合作方式",
+                    title: "比起模糊承诺，我更想给出几个清楚入口。",
+                    intro: "现在更适合的是早期合作、方向梳理、流程设计和付费咨询。重点不是夸张承诺，而是把问题讲清楚，把路线做稳。",
+                    items: [
+                        {
+                            label: "01 / 可行性判断",
+                            title: "研究方向可行性梳理",
+                            body: "把目标、数据情况和研究问题先梳理清楚，判断当前这条预测模型方向值不值得推进，还是应该先换问法。"
+                        },
+                        {
+                            label: "02 / 工作流设计",
+                            title: "工作流与系统搭建",
+                            body: "把研究支持、AI 工具、结果整理和交付流程做得更轻、更稳、更容易重复使用。"
+                        },
+                        {
+                            label: "03 / 付费咨询",
+                            title: "AI 工具与项目方向咨询",
+                            body: "直接聊项目框架、工具选择、实现路径，以及怎样避免在错误版本上浪费几个月。"
+                        }
+                    ]
+                },
+                contact: {
+                    kicker: "联系我",
+                    title: "如果这页对你有用，就应该很容易找到我。",
+                    body1: "如果你想聊研究支持、工作流设计、AI 系统规划，或者你已经有一个明确的付费咨询需求，下面这些方式就是最快的入口。",
+                    body2: "最简单的仍然是邮件。如果你已经知道自己要讨论什么，直接把问题、现状和预期帮助写清楚，会节省很多来回。",
+                    primary: "邮件沟通合作",
+                    secondary: "付费咨询",
+                    cards: [
+                        {
+                            label: "Email",
+                            title: "首选联系方式",
+                            body: "最适合合作沟通、项目讨论，以及所有需要上下文的事情。",
+                            href: "mailto:iridite@foxmail.com",
+                            linkLabel: "iridite@foxmail.com ->"
+                        },
+                        {
+                            label: "X / Twitter",
+                            title: "公开更新",
+                            body: "这里能看到我的公开判断、笔记更新以及这条主线的持续推进。",
+                            href: "https://x.com/iridite_",
+                            linkLabel: "@iridite_ ->",
+                            offset: true
+                        },
+                        {
+                            label: "Telegram",
+                            title: "更快联系",
+                            body: "如果你已经知道要聊什么，不想从长邮件开始，也可以直接走这里。",
+                            href: "https://t.me/eubd37",
+                            linkLabel: "t.me/eubd37 ->"
+                        },
+                        {
+                            label: "GitHub",
+                            title: "代码与项目证明",
+                            body: "公开仓库、工具，以及工程实现这一侧的 portfolio 证明。",
+                            href: "https://github.com/iridite",
+                            linkLabel: "github.com/iridite ->"
+                        }
+                    ]
+                },
+                footer: {
+                    name: "Iridite",
+                    tagline: "AI 应用工程师 / 医疗预测研究支持 / 工作流系统"
                 }
-
-                // ESC key to close skill panel
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.selectedSkill) {
-                        this.closeSkillDetail();
-                    }
-                });
-            },
-            beforeUnmount() {
-                document.removeEventListener('mousemove', this.handleMouseMove);
             }
-        }).mount('#app');
+        };
+
+        const q = (selector) => document.querySelector(selector);
+
+        function detectLocale() {
+            const saved = window.localStorage.getItem("iridite-locale");
+            if (saved === "en" || saved === "zh") {
+                return saved;
+            }
+
+            const langs = navigator.languages && navigator.languages.length
+                ? navigator.languages
+                : [navigator.language || "en"];
+
+            return langs.some((lang) => /^zh/i.test(lang)) ? "zh" : "en";
+        }
+
+        function renderSimpleCards(containerId, items) {
+            const container = q(`#${containerId}`);
+            container.innerHTML = items.map((item) => `
+                <article class="card">
+                    <p class="card-label">${item.label}</p>
+                    <h3 class="card-title">${item.title}</h3>
+                    <p class="card-copy">${item.body}</p>
+                </article>
+            `).join("");
+        }
+
+        function renderWork(items) {
+            const container = q("#work-grid");
+            container.innerHTML = items.map((item) => {
+                const classes = [
+                    "card",
+                    "work-card",
+                    item.featured ? "work-card--featured" : "",
+                    item.tall ? "work-card--tall" : ""
+                ].filter(Boolean).join(" ");
+
+                return `
+                    <article class="${classes}">
+                        <p class="card-label">${item.label}</p>
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-copy">${item.body}</p>
+                        <ul class="tag-list">
+                            ${item.tags.map((tag) => `<li>${tag}</li>`).join("")}
+                        </ul>
+                        <ul class="link-list">
+                            ${item.links.map((link) => `
+                                <li><a href="${link.href}" target="${link.href.startsWith("http") ? "_blank" : "_self"}" rel="noreferrer">${link.label}</a></li>
+                            `).join("")}
+                        </ul>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function renderNotes(items) {
+            const container = q("#notes-list");
+            container.innerHTML = items.map((item) => `
+                <article class="note-row">
+                    <p class="note-meta">${item.meta}</p>
+                    <div>
+                        <h3 class="note-title">${item.title}</h3>
+                        <p class="note-copy">${item.body}</p>
+                    </div>
+                    <a class="note-link" href="${item.href}" target="_blank" rel="noreferrer">${item.linkLabel}</a>
+                </article>
+            `).join("");
+        }
+
+        function renderContacts(items) {
+            const container = q("#contact-side");
+            container.innerHTML = items.map((item) => `
+                <article class="contact-card ${item.offset ? "contact-card--offset" : ""}">
+                    <p class="contact-label">${item.label}</p>
+                    <h3 class="contact-title">${item.title}</h3>
+                    <p class="contact-copy">${item.body}</p>
+                    <a class="contact-link" href="${item.href}" target="${item.href.startsWith("http") ? "_blank" : "_self"}" rel="noreferrer">${item.linkLabel}</a>
+                </article>
+            `).join("");
+        }
+
+        function renderQuickContact(items) {
+            const container = q("#quick-contact");
+            container.innerHTML = items.map((item) => `
+                <a href="${item.href}" target="${item.href.startsWith("http") ? "_blank" : "_self"}" rel="noreferrer">
+                    <strong>${item.title}</strong>
+                    <span>${item.caption}</span>
+                </a>
+            `).join("");
+        }
+
+        function applyLocale(locale) {
+            const copy = COPY[locale];
+
+            document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
+            document.documentElement.dataset.locale = locale;
+            document.title = copy.pageTitle;
+            q("#meta-description").setAttribute("content", copy.metaDescription);
+
+            q("#locale-label").textContent = copy.localeLabel;
+            q("#header-email").textContent = copy.headerEmail;
+            q("#nav-now").textContent = copy.nav.now;
+            q("#nav-work").textContent = copy.nav.work;
+            q("#nav-notes").textContent = copy.nav.notes;
+            q("#nav-services").textContent = copy.nav.services;
+            q("#nav-contact").textContent = copy.nav.contact;
+
+            q("#hero-kicker").textContent = copy.hero.kicker;
+            q("#hero-tagline").textContent = copy.hero.tagline;
+            q("#hero-summary").textContent = copy.hero.summary;
+            q("#hero-primary").textContent = copy.hero.primary;
+            q("#hero-secondary").textContent = copy.hero.secondary;
+            q("#side-label").textContent = copy.hero.sideLabel;
+            q("#side-title").textContent = copy.hero.sideTitle;
+            q("#side-note").textContent = copy.hero.sideNote;
+            q("#hero-availability").innerHTML = copy.hero.availability.map((item) => `<li>${item}</li>`).join("");
+            q("#side-list").innerHTML = copy.hero.sideList.map((item) => `<li>${item}</li>`).join("");
+            renderQuickContact(copy.hero.quickContact);
+
+            q("#now-kicker").textContent = copy.now.kicker;
+            q("#now-title").textContent = copy.now.title;
+            q("#now-intro").textContent = copy.now.intro;
+            renderSimpleCards("now-grid", copy.now.items);
+
+            q("#work-kicker").textContent = copy.work.kicker;
+            q("#work-title").textContent = copy.work.title;
+            q("#work-intro").textContent = copy.work.intro;
+            renderWork(copy.work.items);
+
+            q("#notes-kicker").textContent = copy.notes.kicker;
+            q("#notes-title").textContent = copy.notes.title;
+            q("#notes-intro").textContent = copy.notes.intro;
+            renderNotes(copy.notes.items);
+
+            q("#services-kicker").textContent = copy.services.kicker;
+            q("#services-title").textContent = copy.services.title;
+            q("#services-intro").textContent = copy.services.intro;
+            renderSimpleCards("services-grid", copy.services.items);
+
+            q("#contact-kicker").textContent = copy.contact.kicker;
+            q("#contact-title").textContent = copy.contact.title;
+            q("#contact-body-1").textContent = copy.contact.body1;
+            q("#contact-body-2").textContent = copy.contact.body2;
+            q("#contact-primary").textContent = copy.contact.primary;
+            q("#contact-secondary").textContent = copy.contact.secondary;
+            renderContacts(copy.contact.cards);
+
+            q("#footer-name").textContent = copy.footer.name;
+            q("#footer-tagline").textContent = copy.footer.tagline;
+
+            document.querySelectorAll("[data-locale-btn]").forEach((button) => {
+                button.classList.toggle("is-active", button.dataset.localeBtn === locale);
+            });
+        }
+
+        document.querySelectorAll("[data-locale-btn]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const locale = button.dataset.localeBtn;
+                window.localStorage.setItem("iridite-locale", locale);
+                applyLocale(locale);
+            });
+        });
+
+        q("#footer-year").textContent = `© ${new Date().getFullYear()}`;
+        applyLocale(detectLocale());
     </script>
 </body>
 </html>
